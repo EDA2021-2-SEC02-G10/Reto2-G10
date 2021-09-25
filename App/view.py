@@ -24,6 +24,7 @@ import config as cf
 import sys
 import controller
 from DISClib.ADT import list as lt
+from DISClib.ADT import map as mp
 assert cf
 
 
@@ -34,10 +35,12 @@ se hace la solicitud al controlador para ejecutar la
 operación solicitada
 """
 
+
 def printMenu():
     print("Bienvenido")
     print("1- Cargar información en el catálogo")
-    print("2- ")
+    print("2- Encontrar las n obras mas antiguas de un medio")
+
 
 catalog = None
 
@@ -49,9 +52,22 @@ while True:
     inputs = input('Seleccione una opción para continuar\n')
     if int(inputs[0]) == 1:
         print("Cargando información de los archivos ....")
+        catalog = controller.initCatalog()
+        controller.loadData(catalog)
+        sizeArtworks = lt.size(catalog['artworks'])
+        sizeArtists = lt.size(catalog['artists'])
+        print('Obras cargadas: ' + str(sizeArtworks))
+        print('Artistas Cargados: ' + str(sizeArtists))
+        print(lt.getElement(catalog["artists"], 2))
+        print(lt.getElement(catalog["artworks"], 2))
 
     elif int(inputs[0]) == 2:
-        pass
+        
+        mediumArtworks = input('Digite el medio del cual desea encontrar las obras mas antiguas: ')
+        numberArtworks = int(input('Digite el numero de obras mas antiguas que desea ver para dicho medio: '))
+        result = controller.findOldestArtworks(catalog, numberArtworks, mediumArtworks)
+        print('Las ' + str(numberArtworks) + ' obras mas viejas del medio ' + str(mediumArtworks) + 'son: ')
+        print(result)
 
     else:
         sys.exit(0)
