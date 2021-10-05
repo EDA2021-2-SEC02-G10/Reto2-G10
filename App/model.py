@@ -46,19 +46,48 @@ def newCatalog():
     """
     catalog = {'artworks': None,
                'artists': None,
-               'medium': None}
+               'medium': None,
+               'nationality': None,
+               'artistId': None}
 
     catalog['artworks'] = lt.newList('ARRAY_LIST', cmpfunction=compareArtworks)
-    catalog['artists'] = lt.newList('ARRAY_LIST', cmpfunction=compareArtists)
+
+    catalog['artists'] = mp.newMap(1200,
+                                   maptype='CHAINING',
+                                   loadfactor=4.0,
+                                   comparefunction=compareArtists)
+
     catalog['medium'] = mp.newMap(1200,
                                   maptype='CHAINING',
                                   loadfactor=4.0,
-                                comparefunction=compareMedium)
+                                  comparefunction=compareMedium)
+
+    catalog['nationality'] = mp.newMap(1200,
+                                       maptype='CHAINING',
+                                       loadfactor=4.0,
+                                       comparefunction=compareNationality)
+
+    catalog['artistID'] = mp.newMap(1200,
+                                    maptype='CHAINING',
+                                    loadfactor=0.8,
+                                    comparefunction=compareArtistsID)
 
     return catalog
 
 
 # Funciones para agregar informacion al catalogo
+
+
+def addInfoArtist(catalog, name, constituentid, nationality, begindate, enddate, gender):
+
+    if mp.contains(catalog['artistID'], constituentid) is False:
+        mp.put(catalog['artistID'], constituentid, name)
+        artist = {}
+        artist['Nationality'] = nationality
+        artist['BeginDate'] = begindate
+        artist['EndDate'] = enddate
+        artist['Gender'] = gender
+        mp.put(catalog['artists'], name, artist)
 
 
 def addArtwork(catalog, title, dateAcquired, lstmedium, dimensions, lstconstituentid,
@@ -78,6 +107,8 @@ def addArtwork(catalog, title, dateAcquired, lstmedium, dimensions, lstconstitue
     dictArtwork['Length (cm)'] = length
     dictArtwork['Weight (kg)'] = weight
     lt.addLast(catalog['artworks'], dictArtwork)
+
+    # Creacion de la tabla de hash de medios
     for medium in lstmedium:
         dictTD = {}
         if mp.contains(catalog['medium'], medium) is False:
@@ -93,45 +124,22 @@ def addArtwork(catalog, title, dateAcquired, lstmedium, dimensions, lstconstitue
             dictTD['Date'] = dictArtwork['Date']
             lt.addLast(valueMap, dictTD)
 
+    # Creacion tabla nacionalidad
     for cID in lstconstituentid:
-        addArtist(catalog, cID, dictArtwork)
+        lstArtworksCountry = lt.newList('ARRAY_LIST')
+        if mp.contains(catalog['artistID'], cID):
+            entryID = mp.get(catalog['artistID'], cID)
+            name = me.getValue(entryID)
+            entryNationality = mp.get(catalog['artists'], name)
+            nationality = (me.getValue(entryNationality))['Nationality']
 
-
-def addArtist(catalog, constituentid, artwork):
-
-    artists = catalog['artists']
-    posartist = lt.isPresent(artists, constituentid)
-    if posartist > 0:
-        artist = lt.getElement(artists, posartist)
-    else:
-        artist = newArtist(constituentid)
-        lt.addLast(catalog['artists'], artist)
-    lt.addLast(artist['artworks'], artwork)
-
-
-def addInfoArtist(catalog, name, constituentid, nationality, begindate, enddate, gender):
-
-    posartists = lt.isPresent(catalog['artists'], constituentid)
-    if posartists > 0:
-        artist = lt.getElement(catalog['artists'], posartists)
-        artist['name'] = name
-        artist['Nationality'] = nationality
-        artist['BeginDate'] = begindate
-        artist['EndDate'] = enddate
-        artist['Gender'] = gender
-
-    else:
-        dictArtist = newArtist(constituentid)
-        dictArtist['name'] = name
-        dictArtist['Nationality'] = nationality
-        dictArtist['BeginDate'] = begindate
-        dictArtist['EndDate'] = enddate
-        dictArtist['Gender'] = gender
-
-    posartwork = lt.isPresent(catalog['artworks'], constituentid)
-    if posartwork > 0:
-        artwork = lt.getElement(catalog['artworks'], posartwork)
-        artwork['Artists'].append(name)
+            if mp.contains(catalog['nationality'], nationality) is False:
+                lt.addLast(lstArtworksCountry, title)
+                mp.put(catalog['nationality'], nationality, lstArtworksCountry)
+            else:
+                entry = mp.get(catalog['nationality'], nationality)
+                lstArtworksCountry = me.getValue(entry)
+                lt.addLast(lstArtworksCountry, title)
 
 
 # Funciones para creacion de datos
@@ -139,7 +147,7 @@ def addInfoArtist(catalog, name, constituentid, nationality, begindate, enddate,
 
 def newArtist(constituentid):
 
-    artist = {'name': "", 'ConstituentID': "", 'Nationality': "", "artworks": None,'BeginDate':0, 'EndDate':0,'Gender':""}
+    artist = {'name': "", 'ConstituentID': "", 'Nationality': "", "artworks": None, 'BeginDate':0, 'EndDate':0, 'Gender':""}
     artist['ConstituentID'] = constituentid
     artist['artworks'] = lt.newList('ARRAY_LIST')
 
@@ -170,13 +178,25 @@ def findOldestArtworks(catalog, n, medium):
     return lstFinal
 
 
+def countArtworksNationality(catalog, nationality):
+
+    entryArtworksNationality = mp.get(catalog['nationality'], nationality)
+    lstArtworksNationality = me.getValue(entryArtworksNationality)
+    nArtworks = lt.size(lstArtworksNationality)
+
+    return nArtworks
+
 # Funciones utilizadas para comparar elementos dentro de una lista
 
 
-def compareArtists(artistid1, artist):
-    if artistid1 == artist['ConstituentID']:
+def compareArtists(keyname, artist):
+    artistEntry = me.getKey(artist)
+    if (keyname == artistEntry):
         return 0
-    return -1
+    elif (keyname > artistEntry):
+        return 1
+    else:
+        return -1
 
 
 def compareArtworks(artworkid, artwork):
@@ -193,6 +213,27 @@ def compareMedium(keyname, medium):
         return 1
     else:
         return -1
+
+
+def compareArtistsID(keyname, cID):
+    cIDEntry = me.getKey(cID)
+    if (keyname == cIDEntry):
+        return 0
+    elif (keyname > cIDEntry):
+        return 1
+    else:
+        return -1
+
+
+def compareNationality(keyname, nationality):
+    nationalityEntry = me.getKey(nationality)
+    if (keyname == nationalityEntry):
+        return 0
+    elif (keyname > nationalityEntry):
+        return 1
+    else:
+        return -1
+
 
 # Funciones de ordenamiento
 

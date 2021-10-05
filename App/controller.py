@@ -45,8 +45,8 @@ def initCatalog():
 
 def loadData(catalog):
 
-    loadArtworks(catalog)
     loadArtists(catalog)
+    loadArtworks(catalog)
 
 
 def loadArtworks(catalog):
@@ -86,7 +86,8 @@ def loadArtists(catalog):
     artistsfile = cf.data_dir + 'Artists-utf8-small.csv'
     input_file = csv.DictReader(open(artistsfile, encoding='utf-8'))
     for row in input_file:
-        model.addInfoArtist(catalog, row['DisplayName'], row['ConstituentID'], row['Nationality'], row['BeginDate'], row['EndDate'],row['Gender'])
+        model.addInfoArtist(catalog, row['DisplayName'], row['ConstituentID'],
+                            row['Nationality'], row['BeginDate'], row['EndDate'], row['Gender'])
 
 
 # Funciones de ordenamiento
@@ -97,3 +98,8 @@ def loadArtists(catalog):
 def findOldestArtworks(catalog, n, medium):
 
     return model.findOldestArtworks(catalog, n, medium)
+
+
+def countArtworksNationality(catalog, nationality):
+
+    return model.countArtworksNationality(catalog, nationality)

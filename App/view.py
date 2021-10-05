@@ -21,12 +21,13 @@
  """
 
 import config as cf
-import sys
 import controller
 from DISClib.ADT import list as lt
 from DISClib.ADT import map as mp
 assert cf
-
+import sys
+default_limit = 1000
+sys.setrecursionlimit(default_limit*10)
 
 """
 La vista se encarga de la interacción con el usuario
@@ -40,6 +41,7 @@ def printMenu():
     print("Bienvenido")
     print("1- Cargar información en el catálogo")
     print("2- Encontrar las n obras mas antiguas de un medio")
+    print("3- Encontrar el numero de obras de una nacionalidad")
 
 
 catalog = None
@@ -55,19 +57,25 @@ while True:
         catalog = controller.initCatalog()
         controller.loadData(catalog)
         sizeArtworks = lt.size(catalog['artworks'])
-        sizeArtists = lt.size(catalog['artists'])
         print('Obras cargadas: ' + str(sizeArtworks))
-        print('Artistas Cargados: ' + str(sizeArtists))
-        print(lt.getElement(catalog["artists"], 2))
+        listArtistsloaded = mp.keySet(catalog['nationality'])
+        numArtistsloaded = lt.size(listArtistsloaded)
+        print('Artistas Cargados: ' + str(numArtistsloaded))
         print(lt.getElement(catalog["artworks"], 2))
 
     elif int(inputs[0]) == 2:
-        
+
         mediumArtworks = input('Digite el medio del cual desea encontrar las obras mas antiguas: ')
         numberArtworks = int(input('Digite el numero de obras mas antiguas que desea ver para dicho medio: '))
         result = controller.findOldestArtworks(catalog, numberArtworks, mediumArtworks)
         print('Las ' + str(numberArtworks) + ' obras mas viejas del medio ' + str(mediumArtworks) + 'son: ')
         print(result)
+
+    elif int(inputs[0]) == 3:
+
+        inputNationality = input("Digite la nacionalidad de la cual desea consultar su numero de obras: ")
+        result = controller.countArtworksNationality(catalog, inputNationality)
+        print('La nacionalidad mencionada tiene: ' + str(result) + ' obras registradas en el MOMA')
 
     else:
         sys.exit(0)
