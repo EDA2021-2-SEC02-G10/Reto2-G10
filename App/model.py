@@ -25,6 +25,7 @@
  """
 
 
+from os import name
 from DISClib.DataStructures.arraylist import newList
 import config as cf
 from DISClib.ADT import list as lt
@@ -149,6 +150,7 @@ def addArtwork(catalog, title, dateAcquired, lstmedium, dimensions, lstconstitue
     dictArtwork['Department'] = department
     dictArtwork['Length (cm)'] = length
     dictArtwork['Weight (kg)'] = weight
+    dictArtwork['Artists'] = lstconstituentid
     lt.addLast(catalog['artworks'], dictArtwork)
 
     # Creacion tabla nacionalidad
@@ -269,15 +271,6 @@ def addArtwork(catalog, title, dateAcquired, lstmedium, dimensions, lstconstitue
 # Funciones para creacion de datos
 
 
-def newArtist(constituentid):
-
-    artist = {'name': "", 'ConstituentID': "", 'Nationality': "", "artworks": None, 'BeginDate':0, 'EndDate':0, 'Gender':""}
-    artist['ConstituentID'] = constituentid
-    artist['artworks'] = lt.newList('ARRAY_LIST')
-
-    return artist
-
-
 def newArtwork(title):
     artwork = {'Title': "", 'DateAcquired': 0, 'ArtistsID': None, 'Medium': None,
                'Dimensions': "", 'ObjectID': 0, "CreditLine": "", "Artists": [], 'Date': "",
@@ -322,7 +315,7 @@ def sortArtworksByAdDate(catalog, d1, d2):
             totalArtworks += 1
             if 'Purchase' in lstElement['CreditLine']:
                 totalPurchasedartworks += 1
-   
+
     return lstFinal, totalArtworks, totalPurchasedartworks
 
 
@@ -425,6 +418,90 @@ def moveDepartment(catalog, department):
     sortedPrice_list = ms.sort(sub_list2, cmpArtworkByPrice)
 
     return totalPrice, totalWeight, sortedDate_list, sortedPrice_list
+
+
+def findBestArtists(catalog, n, a1, a2):
+
+    artists = mp.keySet(catalog['artists'])
+    lstArtists = lt.newList('ARRAY_LIST')
+    sortLst = lt.newList('ARRAY_LIST')
+    for artist in lt.iterator(artists):
+        dictMediumT = {}
+        sortList = []
+        artistDicEntry = mp.get(catalog['artists'], artist)
+        artistDic = me.getValue(artistDicEntry)
+        if int(artistDic['BeginDate']) >= int(a1):
+            if int(artistDic['BeginDate']) <= int(a2):
+                sortList.append(lt.size(artistDic['Artworks']))
+                checklist = {}
+                for artwork in lt.iterator(artistDic['Artworks']):
+                    dictMediumT = {}
+                    for medium in artwork['Medium']:
+                        if medium not in list(checklist.keys()):
+                            checklist[medium] = 1
+
+                        else:
+                            checklist[medium] += 1
+
+                    dictMediumT[artist] = checklist
+
+                sortList.append(len(list(checklist.keys())))
+                dictSortList = {}
+                dictSortList[artist] = sortList
+                lt.addLast(sortLst, dictSortList)
+                lt.addLast(lstArtists, dictMediumT)
+
+    ltsize = lt.size(sortLst)
+    sub_list = lt.subList(sortLst, 1, ltsize)
+    sub_list = sub_list.copy()
+    sorted_list = None
+    sorted_list = ms.sort(sub_list, cmpArtworksByCond)
+    print(sorted_list)
+
+    # Datos de los n artistas y sus obras
+    cropList = lt.subList(sorted_list, ltsize-n, n)
+    finalListArtists = lt.newList('ARRAY_LIST')
+    for artist in lt.iterator(cropList):
+        finalListArtworks = lt.newList('ARRAY_LIST')
+        dictTemp = {}
+        artistName = (list(artist.keys()))[0]
+        dictTemp['Name'] = artistName
+        dictTemp['TotalArtworks'] = artist[artistName][0]
+        dictTemp['TotalMediums'] = artist[artistName][1]
+        for artst in lt.iterator(lstArtists):
+            if (list(artst.keys()))!= []:
+                artstName = (list(artst.keys()))[0]
+            else:
+                artstName = ''
+            if artistName == artstName:
+                listMediums = list(artst[artstName].values())
+                may = max(listMediums)
+                posMay = listMediums.index(may)
+                dictTemp['FavoriteMedium'] = (list(artst[artstName].keys()))[posMay]
+
+        favMedium = dictTemp['FavoriteMedium']
+        artistDictEntry = mp.get(catalog['artists'], artstName)
+        artistDict = me.getValue(artistDictEntry)
+        for artwork in lt.iterator(artistDict['Artworks']):
+            artworkDict = {}
+            if favMedium in artwork['Medium']:
+                artworkDict['Title'] = artwork['Title']
+                artworkDict['Date'] = artwork['Date']
+                artworkDict['Medium'] = artwork['Medium']
+                artworkDict['Dimensions'] = artwork['Dimensions']
+                lt.addLast(finalListArtworks, artworkDict)
+                if lt.size(finalListArtworks) == 5:
+                    break
+
+        dictTemp['ArtworksMedium'] = finalListArtworks
+        lt.addLast(finalListArtists, dictTemp)
+  
+    print(finalListArtists)
+
+    return finalListArtists
+
+
+    
 
 # Funciones utilizadas para comparar elementos dentro de una lista
 
@@ -599,3 +676,22 @@ def cmpArtworkByPrice(artwork1, artwork2):
         r = False
     return r
 
+
+def cmpArtworksByCond(artist1, artist2):
+
+    nameList1 = list(artist1.keys())
+    name1 = nameList1[0]
+    nameList2 = list(artist2.keys())
+    name2 = nameList2[0]
+    if artist1[name1][0] < artist2[name2][0]:
+        r = True
+    elif artist1[name1][0] > artist2[name2][0]:
+        r = False
+    elif artist1[name1][1] < artist2[name2][1]:
+        r = True
+    elif artist1[name1][1] > artist2[name2][1]:
+        r = False
+    else:
+        r = False
+    return r
+        

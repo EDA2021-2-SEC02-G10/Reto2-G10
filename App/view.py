@@ -152,7 +152,10 @@ while True:
 
     elif int(inputs[0]) == 7:
 
-        a = 1
+        a1 = int(input('Digite en año inicial a consultar: '))
+        a2 = int(input('Digite en año final a consultar: '))
+        n = int(input('Digite la longitud de la lista de artistas mas prolificos: '))
+        result = controller.findBestArtists(catalog, n, a1, a2)
 
     else:
         sys.exit(0)

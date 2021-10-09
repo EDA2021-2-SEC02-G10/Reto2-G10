@@ -111,6 +111,9 @@ def moveDepartment(catalog, department):
     return model.moveDepartment(catalog, department)
 
 
+def findBestArtists(catalog, n, a1, a2):
+
+    return model.findBestArtists(catalog, n, a1, a2)
 
 
 
