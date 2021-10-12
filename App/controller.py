@@ -95,11 +95,25 @@ def loadArtists(catalog):
 
 # Funciones de consulta sobre el catálogo
 
-def findOldestArtworks(catalog, n, medium):
 
-    return model.findOldestArtworks(catalog, n, medium)
+def sortArtworksByAdDate(catalog, d1, d2):
+
+    return model.sortArtworksByAdDate(catalog, d1, d2)
 
 
-def countArtworksNationality(catalog, nationality):
+def countArtworksNationality(catalog):
 
-    return model.countArtworksNationality(catalog, nationality)
+    return model.countArtworksByNationality(catalog)
+
+
+def moveDepartment(catalog, department):
+
+    return model.moveDepartment(catalog, department)
+
+
+def findBestArtists(catalog, n, a1, a2):
+
+    return model.findBestArtists(catalog, n, a1, a2)
+
+
+
