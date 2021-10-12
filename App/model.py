@@ -27,6 +27,7 @@
 
 from os import name
 from DISClib.DataStructures.arraylist import newList
+from DISClib.DataStructures.chaininghashtable import get
 import config as cf
 from DISClib.ADT import list as lt
 from DISClib.ADT import map as mp
@@ -88,6 +89,10 @@ def newCatalog():
                                              maptype='CHAINING',
                                              loadfactor=4.0,
                                              comparefunction=compareCountryByNumberOfArtworks)
+    catalog['bestArtists'] = mp.newMap(100,
+                                       maptype='CHAINING',
+                                       loadfactor=4.0,
+                                       comparefunction=compareCountryByBestArtists)
 
     return catalog
 
@@ -420,6 +425,7 @@ def moveDepartment(catalog, department):
     return totalPrice, totalWeight, sortedDate_list, sortedPrice_list
 
 
+"""
 def findBestArtists(catalog, n, a1, a2):
 
     artists = mp.keySet(catalog['artists'])
@@ -460,48 +466,103 @@ def findBestArtists(catalog, n, a1, a2):
 
     # Datos de los n artistas y sus obras
     cropList = lt.subList(sorted_list, ltsize-n, n)
-    finalListArtists = lt.newList('ARRAY_LIST')
     for artist in lt.iterator(cropList):
-        finalListArtworks = lt.newList('ARRAY_LIST')
-        dictTemp = {}
-        artistName = (list(artist.keys()))[0]
-        dictTemp['Name'] = artistName
-        dictTemp['TotalArtworks'] = artist[artistName][0]
-        dictTemp['TotalMediums'] = artist[artistName][1]
-        for artst in lt.iterator(lstArtists):
-            if (list(artst.keys()))!= []:
-                artstName = (list(artst.keys()))[0]
-            else:
-                artstName = ''
-            if artistName == artstName:
-                listMediums = list(artst[artstName].values())
-                may = max(listMediums)
-                posMay = listMediums.index(may)
-                dictTemp['FavoriteMedium'] = (list(artst[artstName].keys()))[posMay]
+        entry = mp.get(catalog['artists'], artist)
+        dic = me.getValue(entry)
+        artworks = dic['Artworks']
+        for artwork in lt.iterator(artworks):
+            table = mp.newMap(100,
+                              maptype='CHAINING',
+                              loadfactor=4.0,
+                              comparefunction=compareCountryByBestArtists)
+            for medium in artwork['Medium']:
+                lstT = lt.newList('ARRAY_LIST')
+                if mp.contains(table, medium) is False:
+                    dicTemp = {}
+                    dicTemp['Title'] = dic['Title']
+                    dicTemp['Date'] = dic['Date']
+                    dicTemp['Medium'] = dic['Medium']
+                    dicTemp['Dimensions'] = dic['Dimensions']
+                    lt.addLast(lstT, dicTemp)
+                    mp.put(table, medium, lstT)
 
-        favMedium = dictTemp['FavoriteMedium']
-        artistDictEntry = mp.get(catalog['artists'], artstName)
-        artistDict = me.getValue(artistDictEntry)
-        for artwork in lt.iterator(artistDict['Artworks']):
-            artworkDict = {}
-            if favMedium in artwork['Medium']:
-                artworkDict['Title'] = artwork['Title']
-                artworkDict['Date'] = artwork['Date']
-                artworkDict['Medium'] = artwork['Medium']
-                artworkDict['Dimensions'] = artwork['Dimensions']
-                lt.addLast(finalListArtworks, artworkDict)
-                if lt.size(finalListArtworks) == 5:
-                    break
+                else:
+                    entryDic = mp.get(table, medium)
+                    lstT = me.getValue(entryDic)
+                    dicTemp = {}
+                    dicTemp['Title'] = dic['Title']
+                    dicTemp['Date'] = dic['Date']
+                    dicTemp['Medium'] = dic['Medium']
+                    dicTemp['Dimensions'] = dic['Dimensions']
+                    lt.addLast(lstT, dicTemp)
 
-        dictTemp['ArtworksMedium'] = finalListArtworks
-        lt.addLast(finalListArtists, dictTemp)
-  
-    print(finalListArtists)
+        mp.put(catalog['bestArtists'], artist, table)
+
+    finalArtists = mp.keySet(catalog['bestArtists'])
+    finalListArtists = lt.newList('ARRAY_LIST')
+    for finalArtist in lt.iterator(finalArtists):
+        finalArtistName = (list(finalArtist.keys()))[0]
+        dicFinal = {}
+        dicFinal['Name'] = finalArtistName
+        for cropArtist in lt.iterator(cropList):
+            cropArtistName = (list(cropArtist.keys()))[0]
+            if finalArtistName == cropArtistName:
+                dicFinal['TotalArtworks'] = cropArtist[cropArtistName][0]
+                dicFinal['TotalMediums'] = cropArtist[cropArtistName][0]
+
+        finalArtistMediums = mp.valueSet(mp.get(catalog['bestArtists'], finalArtist))
+        for finalMedium in lt.iterator(finalArtistMediums):
+            finalMediumName = (list(finalMedium.keys()))[0]
+            may = 0
+            if lt.size(finalMedium[finalMediumName]) > may:
+                may = lt.size(finalMedium[finalMediumName])
+                favMedium = finalMediumName
+
+        favMediumLst = (mp.get(catalog['bestArtists'], finalArtist))[favMedium]
+        finalArtworkList = lt.newList('ARRAY_LIST')
+        for artwk in lt.iterator(favMediumLst):
+            lt.addLast(finalArtworkList, artwk)
+            if lt.size(finalArtworkList) == 5:
+                break
+
+        dicFinal['ArtworksMedium'] = finalArtworkList
 
     return finalListArtists
+"""
 
 
-    
+def findBestArtists(catalog, n, a1, a2):
+
+    artists = mp.keySet(catalog['artists'])
+    sortLst = lt.newList('ARRAY_LIST')
+    for artist in lt.iterator(artists):
+        sortList = []
+        artistDicEntry = mp.get(catalog['artists'], artist)
+        artistDic = me.getValue(artistDicEntry)  
+        if int(artistDic['BeginDate']) >= int(a1):
+            if int(artistDic['BeginDate']) <= int(a2):
+                sortList.append(lt.size(artistDic['Artworks']))
+                checklist = {}
+                for artwork in lt.iterator(artistDic['Artworks']):
+                    for medium in artwork['Medium']:
+                        if medium not in list(checklist.keys()):
+                            checklist[medium] = 1
+
+                        else:
+                            checklist[medium] += 1
+
+                sortList.append(len(list(checklist.keys())))
+                dictSortList = {}
+                dictSortList[artist] = sortList
+                lt.addLast(sortLst, dictSortList)
+
+    ltsize = lt.size(sortLst)
+    sub_list = lt.subList(sortLst, 1, ltsize)
+    sub_list = sub_list.copy()
+    sorted_list = None
+    sorted_list = ms.sort(sub_list, cmpArtworksByCond)
+    print(sorted_list)
+
 
 # Funciones utilizadas para comparar elementos dentro de una lista
 
@@ -573,6 +634,16 @@ def compareArtworksByDepartment(keyname, department):
 
 
 def compareCountryByNumberOfArtworks(keyname, department):
+    depEntry = me.getKey(department)
+    if (keyname == depEntry):
+        return 0
+    elif (keyname > depEntry):
+        return 1
+    else:
+        return -1
+
+
+def compareCountryByBestArtists(keyname, department):
     depEntry = me.getKey(department)
     if (keyname == depEntry):
         return 0
