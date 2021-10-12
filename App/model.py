@@ -34,6 +34,7 @@ from DISClib.ADT import map as mp
 from DISClib.DataStructures import mapentry as me
 from DISClib.Algorithms.Sorting import mergesort as ms
 assert cf
+import time
 
 """
 Se define la estructura de un catálogo de videos. El catálogo tendrá dos listas, una para los videos, otra para las categorias de
@@ -47,6 +48,7 @@ def newCatalog():
     """
 
     """
+    
     catalog = {'artworks': None,
                'artists': None,
                'medium': None,
@@ -73,7 +75,7 @@ def newCatalog():
     catalog['artistID'] = mp.newMap(1200,
                                     maptype='CHAINING',
                                     loadfactor=0.8,
-                                    comparefunction=compareArtistsID)
+                                    comparefunction=compareArtistsID)                       
 
     catalog['adDate'] = mp.newMap(1200,
                                   maptype='CHAINING',
