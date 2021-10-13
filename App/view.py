@@ -92,6 +92,20 @@ def printMoveDepartment(result):
     print(result[3]['elements'][-5])
 
 
+def printBestArtists(result, n):
+    artists = result[0]
+    artworks = result[1]
+    topArtist = lt.getElement(artists, 1)
+    topArtistName = topArtist['Name']
+    print('En el periodo dado los artistas mas prolificos son: ')
+    for artist in lt.iterator(artists):
+        print(artist)
+
+    print('Las 5 primeras obras de '+ str(topArtistName) + ' de su tecnica favorita son: ')
+    for artwork in lt.iterator(artworks):
+        print(artwork)
+
+
 def printMenu():
     print("Bienvenido")
     print("1- Cargar información en el catálogo")
@@ -156,6 +170,7 @@ while True:
         a2 = int(input('Digite en año final a consultar: '))
         n = int(input('Digite la longitud de la lista de artistas mas prolificos: '))
         result = controller.findBestArtists(catalog, n, a1, a2)
+        printBestArtists(result, n)
 
     else:
         sys.exit(0)

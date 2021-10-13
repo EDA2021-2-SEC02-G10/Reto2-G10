@@ -198,6 +198,10 @@ def addArtwork(catalog, title, dateAcquired, lstmedium, dimensions, lstconstitue
         dictArtw['Date'] = date
         dictArtw['Medium'] = lstmedium
         dictArtw['Dimensions'] = dimensions
+        dictArtw['DateAcquired'] = dateAcquired
+        dictArtw['Department'] = department
+        dictArtw['Dimensions'] = dimensions
+        dictArtw['Classification'] = classification
         lt.addLast(dictArtist['Artworks'], dictArtw)
 
     # Creacion tabla adDate de obras
@@ -425,112 +429,6 @@ def moveDepartment(catalog, department):
     return totalPrice, totalWeight, sortedDate_list, sortedPrice_list
 
 
-"""
-def findBestArtists(catalog, n, a1, a2):
-
-    artists = mp.keySet(catalog['artists'])
-    lstArtists = lt.newList('ARRAY_LIST')
-    sortLst = lt.newList('ARRAY_LIST')
-    for artist in lt.iterator(artists):
-        dictMediumT = {}
-        sortList = []
-        artistDicEntry = mp.get(catalog['artists'], artist)
-        artistDic = me.getValue(artistDicEntry)
-        if int(artistDic['BeginDate']) >= int(a1):
-            if int(artistDic['BeginDate']) <= int(a2):
-                sortList.append(lt.size(artistDic['Artworks']))
-                checklist = {}
-                for artwork in lt.iterator(artistDic['Artworks']):
-                    dictMediumT = {}
-                    for medium in artwork['Medium']:
-                        if medium not in list(checklist.keys()):
-                            checklist[medium] = 1
-
-                        else:
-                            checklist[medium] += 1
-
-                    dictMediumT[artist] = checklist
-
-                sortList.append(len(list(checklist.keys())))
-                dictSortList = {}
-                dictSortList[artist] = sortList
-                lt.addLast(sortLst, dictSortList)
-                lt.addLast(lstArtists, dictMediumT)
-
-    ltsize = lt.size(sortLst)
-    sub_list = lt.subList(sortLst, 1, ltsize)
-    sub_list = sub_list.copy()
-    sorted_list = None
-    sorted_list = ms.sort(sub_list, cmpArtworksByCond)
-    print(sorted_list)
-
-    # Datos de los n artistas y sus obras
-    cropList = lt.subList(sorted_list, ltsize-n, n)
-    for artist in lt.iterator(cropList):
-        entry = mp.get(catalog['artists'], artist)
-        dic = me.getValue(entry)
-        artworks = dic['Artworks']
-        for artwork in lt.iterator(artworks):
-            table = mp.newMap(100,
-                              maptype='CHAINING',
-                              loadfactor=4.0,
-                              comparefunction=compareCountryByBestArtists)
-            for medium in artwork['Medium']:
-                lstT = lt.newList('ARRAY_LIST')
-                if mp.contains(table, medium) is False:
-                    dicTemp = {}
-                    dicTemp['Title'] = dic['Title']
-                    dicTemp['Date'] = dic['Date']
-                    dicTemp['Medium'] = dic['Medium']
-                    dicTemp['Dimensions'] = dic['Dimensions']
-                    lt.addLast(lstT, dicTemp)
-                    mp.put(table, medium, lstT)
-
-                else:
-                    entryDic = mp.get(table, medium)
-                    lstT = me.getValue(entryDic)
-                    dicTemp = {}
-                    dicTemp['Title'] = dic['Title']
-                    dicTemp['Date'] = dic['Date']
-                    dicTemp['Medium'] = dic['Medium']
-                    dicTemp['Dimensions'] = dic['Dimensions']
-                    lt.addLast(lstT, dicTemp)
-
-        mp.put(catalog['bestArtists'], artist, table)
-
-    finalArtists = mp.keySet(catalog['bestArtists'])
-    finalListArtists = lt.newList('ARRAY_LIST')
-    for finalArtist in lt.iterator(finalArtists):
-        finalArtistName = (list(finalArtist.keys()))[0]
-        dicFinal = {}
-        dicFinal['Name'] = finalArtistName
-        for cropArtist in lt.iterator(cropList):
-            cropArtistName = (list(cropArtist.keys()))[0]
-            if finalArtistName == cropArtistName:
-                dicFinal['TotalArtworks'] = cropArtist[cropArtistName][0]
-                dicFinal['TotalMediums'] = cropArtist[cropArtistName][0]
-
-        finalArtistMediums = mp.valueSet(mp.get(catalog['bestArtists'], finalArtist))
-        for finalMedium in lt.iterator(finalArtistMediums):
-            finalMediumName = (list(finalMedium.keys()))[0]
-            may = 0
-            if lt.size(finalMedium[finalMediumName]) > may:
-                may = lt.size(finalMedium[finalMediumName])
-                favMedium = finalMediumName
-
-        favMediumLst = (mp.get(catalog['bestArtists'], finalArtist))[favMedium]
-        finalArtworkList = lt.newList('ARRAY_LIST')
-        for artwk in lt.iterator(favMediumLst):
-            lt.addLast(finalArtworkList, artwk)
-            if lt.size(finalArtworkList) == 5:
-                break
-
-        dicFinal['ArtworksMedium'] = finalArtworkList
-
-    return finalListArtists
-"""
-
-
 def findBestArtists(catalog, n, a1, a2):
 
     artists = mp.keySet(catalog['artists'])
@@ -561,7 +459,58 @@ def findBestArtists(catalog, n, a1, a2):
     sub_list = sub_list.copy()
     sorted_list = None
     sorted_list = ms.sort(sub_list, cmpArtworksByCond)
-    print(sorted_list)
+    crop_list = lt.subList(sorted_list, 1, n)
+
+    # Datos de los artistas
+    lstFinalArtists = lt.newList('ARRAY_LIST')
+    for artist in lt.iterator(crop_list):
+        artistName = (list(artist.keys()))[0]
+        dictFinal = {}
+        dictFinal['Name'] = artistName
+        dictFinal['TotalArtworks'] = (artist[artistName])[0]
+        dictFinal['TotalMediums'] = (artist[artistName])[1]
+        specificArtistEntry = mp.get(catalog['artists'], artistName)
+        specificArtist = me.getValue(specificArtistEntry)
+        dictFinal['Gender'] = specificArtist['Gender']
+        dictFinal['BeginDate'] = specificArtist['BeginDate']
+        dictCheck = {}
+        # Busqueda de la tecnica favorita
+        for artwork in lt.iterator(specificArtist['Artworks']):
+            lstMediums = artwork['Medium']
+            for medium in lstMediums:
+                if medium not in (list(dictCheck.keys())):
+                    dictCheck[medium] = 1
+                else:
+                    dictCheck[medium] += 1
+
+        maxElement = max(list(dictCheck.values()))
+        posMaxElement = (list(dictCheck.values())).index(maxElement)
+        favMedium = (list(dictCheck.keys()))[posMaxElement]
+        dictFinal['FavoriteMedium'] = favMedium
+        lt.addLast(lstFinalArtists, dictFinal)
+
+    # 5 obras de top artist
+    topArtist = lt.getElement(lstFinalArtists, 1)
+    topArtistName = topArtist['Name']
+    lstTopArtistArtworks = lt.newList('ARRAY_LIST')
+    topArtistDictEntry = mp.get(catalog['artists'], topArtistName)
+    topArtistDict = me.getValue(topArtistDictEntry)
+    for artwork in lt.iterator(topArtistDict['Artworks']):
+        dictArtwork = {}
+        if topArtist['FavoriteMedium'] in artwork['Medium']:
+            dictArtwork['Title'] = artwork['Title']
+            dictArtwork['Date'] = artwork['Date']
+            dictArtwork['DateAcquired'] = artwork['DateAcquired']
+            dictArtwork['Medium'] = artwork['Medium']
+            dictArtwork['Department'] = artwork['Department']
+            dictArtwork['Classification'] = artwork['Classification']
+            dictArtwork['Dimensions'] = artwork['Dimensions']
+            lt.addLast(lstTopArtistArtworks, dictArtwork)
+
+        if lt.size(lstTopArtistArtworks) == 5:
+            break
+
+    return lstFinalArtists, lstTopArtistArtworks
 
 
 # Funciones utilizadas para comparar elementos dentro de una lista
@@ -755,13 +704,13 @@ def cmpArtworksByCond(artist1, artist2):
     nameList2 = list(artist2.keys())
     name2 = nameList2[0]
     if artist1[name1][0] < artist2[name2][0]:
-        r = True
+        r = False
     elif artist1[name1][0] > artist2[name2][0]:
-        r = False
-    elif artist1[name1][1] < artist2[name2][1]:
         r = True
+    elif artist1[name1][1] < artist2[name2][1]:
+        r = False
     elif artist1[name1][1] > artist2[name2][1]:
-        r = False
+        r = True
     else:
-        r = False
+        r = True
     return r
