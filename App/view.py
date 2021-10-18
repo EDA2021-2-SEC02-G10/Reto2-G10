@@ -36,7 +36,7 @@ Presenta el menu de opciones y por cada seleccion
 se hace la solicitud al controlador para ejecutar la
 operación solicitada
 """
-
+    
 
 def printSortedResults(result):
 
@@ -138,8 +138,18 @@ while True:
         print(lt.getElement(catalog["artworks"], 2))
 
     elif int(inputs[0]) == 2:
-
-        a = 1
+        a1=int(input('Indique el año inicial:'))
+        a2 = int(input('Indique el año final:'))
+        r = controller.sortArtists(catalog,a1,a2)
+        print('Hay ' + str(r[1]) + ' artistas que nacieron entre ' + str(a1) + ' y ' + str(a2))
+        print('Los tres primeros artistas del rango son: ')
+        print(r[0]['elements'][0])
+        print(r[0]['elements'][1])
+        print(r[0]['elements'][2])
+        print('Las ultimas 3 obras del rango en base a su fecha de creacion son: ')
+        print(r[0]['elements'][-1])
+        print(r[0]['elements'][-2])
+        print(r[0]['elements'][-3])
 
     elif int(inputs[0]) == 3:
 
@@ -150,8 +160,10 @@ while True:
         printSortedResults(result)
 
     elif int(inputs[0]) == 4:
-
-        a = 1
+        name = input ('Indique el nombre del artista: ')
+        r = controller.classifyArtists(catalog,name)
+        print (r)
+        
     elif int(inputs[0]) == 5:
 
         result = controller.countArtworksNationality(catalog)
