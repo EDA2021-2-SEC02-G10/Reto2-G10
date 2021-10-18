@@ -55,9 +55,9 @@ def newCatalog():
 
     catalog['artworks'] = lt.newList('ARRAY_LIST', cmpfunction=compareArtworks)
 
-    catalog['artists'] = mp.newMap(1200,
-                                   maptype='CHAINING',
-                                   loadfactor=4.0,
+    catalog['artists'] = mp.newMap(34000,
+                                   maptype='PROBING',
+                                   loadfactor=0.5,
                                    comparefunction=compareArtists)
 
     catalog['birthArtist'] = mp.newMap(1200,
@@ -65,17 +65,17 @@ def newCatalog():
                                        loadfactor=4.0,
                                        comparefunction=compareBirthArtist)
 
-    catalog['nationality'] = mp.newMap(1200,
+    catalog['nationality'] = mp.newMap(200,
                                        maptype='CHAINING',
                                        loadfactor=4.0,
                                        comparefunction=compareNationality)
 
-    catalog['artistID'] = mp.newMap(1200,
+    catalog['artistID'] = mp.newMap(17000,
                                     maptype='CHAINING',
                                     loadfactor=0.8,
                                     comparefunction=compareArtistsID)
 
-    catalog['adDate'] = mp.newMap(1200,
+    catalog['adDate'] = mp.newMap(40000,
                                   maptype='CHAINING',
                                   loadfactor=4.0,
                                   comparefunction=compareArtworksByAdDAte)
@@ -85,14 +85,10 @@ def newCatalog():
                                       loadfactor=4.0,
                                       comparefunction=compareArtworksByDepartment)
 
-    catalog['numberNationality'] = mp.newMap(1200,
+    catalog['numberNationality'] = mp.newMap(500,
                                              maptype='CHAINING',
                                              loadfactor=4.0,
                                              comparefunction=compareCountryByNumberOfArtworks)
-    catalog['bestArtists'] = mp.newMap(100,
-                                       maptype='CHAINING',
-                                       loadfactor=4.0,
-                                       comparefunction=compareCountryByBestArtists)
 
     catalog['techniques'] = mp.newMap(1200,
                                         maptype='CHAINING',
