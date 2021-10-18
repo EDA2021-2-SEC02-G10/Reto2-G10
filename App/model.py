@@ -26,7 +26,7 @@
 
 
 from os import name
-from DISClib.DataStructures.arraylist import newList
+from DISClib.DataStructures.arraylist import addLast, newList
 from DISClib.DataStructures.chaininghashtable import get
 import config as cf
 from DISClib.ADT import list as lt
@@ -97,7 +97,6 @@ def newCatalog():
 
 
 def addInfoArtist(catalog, name, constituentid, nationality, begindate, enddate, gender):
-
     # Creacion de tabla artistID y artists
     if mp.contains(catalog['artistID'], constituentid) is False:
         mp.put(catalog['artistID'], constituentid, name)
@@ -286,7 +285,40 @@ def newArtwork(title):
 
 
 # Funciones de consulta
+def sortArtists (catalog, year1,year2):
+    yearkeys = mp.keySet(catalog['birthArtist'])
+    yearlist = lt.newList('ARRAY_LIST')
 
+    for year in lt.iterator(yearkeys):
+        if cmpArtistbyBirthDate(year1, year) is True:
+            if cmpArtistbyBirthDate(year, year2) is True:
+                lt.addLast(yearlist, year)
+
+    sub_list = yearlist.copy()
+    sorted_list = None
+    sorted_list = ms.sort(sub_list,cmpArtistbyBirthDate)
+    totalArtists = 0
+    listaFinal=lt.newList('ARRAY_LIST')
+    for x in lt.iterator(sorted_list):
+        entryData = mp.get(catalog['birthArtist'],x)
+        data = me.getValue(entryData)
+        for y in lt.iterator(data):
+            d = {}
+            d['Nombre'] = y['name']
+            if y ['BeginDate'] == '0':
+                d['año de nacimiento'] = 'no se sabe'
+            else:
+                d['año de nacimiento'] = y['BeginDate']
+            if y['EndDate'] == '0':
+                d['año de fallecimiento'] = ''
+            else:
+                d['año de fallecimiento'] = y['EndDate']
+
+            d['Nacionalidad'] = y['Nationality']
+            d['Género'] = y['Gender']
+            lt.addLast(listaFinal,d)
+            totalArtists += 1
+    return (listaFinal, totalArtists)
 
 def sortArtworksByAdDate(catalog, d1, d2):
 
@@ -323,7 +355,34 @@ def sortArtworksByAdDate(catalog, d1, d2):
 
     return lstFinal, totalArtworks, totalPurchasedartworks
 
+def classifyArtists (catalog, name):
+    total_obras = 0
+    total_medios = 0
+    artists = mp.keySet(catalog['artists'])
+    for x in lt.iterator(artists):
+        if x == name:
+            total_obras += 1
+            valores = mp.get(catalog['artists'],x)
+            v = me.getValue(valores)
+    total_obras = lt.size (v['Artworks'])
+    
+    lista_medios = lt.newList('ARRAY_LIST')
+    for i in lt.iterator(v['Artworks']):
+        lt.addLast(lista_medios,i['Medium']) 
+    
+    sub_list = lista_medios.copy()
+    sorted_list = None
+    sorted_list = ms.sort(sub_list,cmpartistsbymedium)
+    lista_prueba = lt.newList('ARRAY_LIST')
+    for j in lt.iterator(sorted_list):
+        if (lt.isPresent (lista_prueba, j)) == 0:
+            total_medios +=1
+            lt.addLast(lista_prueba,j)
 
+
+
+
+    
 def countArtworksByNationality(catalog):
 
     countries = mp.keySet(catalog['nationality'])
@@ -618,6 +677,13 @@ def cmpArtworksByDate(artwork1, artwork2):
         r = False
     return r
 
+def cmpartistsbymedium (medium1,medium2):
+    r = None
+    if medium1 >= medium2:
+        r = True
+    else:
+        r = False
+    return r
 
 def cmpCountriesbyArtworks(country1, country2):
 
@@ -629,6 +695,14 @@ def cmpCountriesbyArtworks(country1, country2):
 
     return r
 
+def cmpArtistbyBirthDate(date1, date2):
+    r = None
+
+    if (int(date1)) <= (int(date2)):
+        r = True
+    else:
+        r = False
+    return r
 
 def cmpArtworkByDateAcquired(artwork1, artwork2):
     """ Devuelve verdadero (True) si el 'DateAcquired' de artwork1 es menores que el de artwork2
@@ -645,7 +719,7 @@ def cmpArtworkByDateAcquired(artwork1, artwork2):
     if (len(date2)) < 2:
         date2 = [2021, 10, 20]
         artwork2 = '2021-10-02'
-
+    
     if int(date1[0]) < int(date2[0]):
         r = True
     elif int(date1[0]) > int(date2[0]):
