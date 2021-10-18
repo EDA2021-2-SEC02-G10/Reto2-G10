@@ -94,6 +94,10 @@ def newCatalog():
                                        loadfactor=4.0,
                                        comparefunction=compareCountryByBestArtists)
 
+    catalog['techniques'] = mp.newMap(1200,
+                                        maptype='CHAINING',
+                                        loadfactor=4.0,
+                                        comparefunction=compareCountryByNumberOfArtworks)
     return catalog
 
 
@@ -373,19 +377,38 @@ def classifyArtists (catalog, name):
     lista_medios = lt.newList('ARRAY_LIST')
     for i in lt.iterator(v['Artworks']):
         lt.addLast(lista_medios,i['Medium']) 
-    
     sub_list = lista_medios.copy()
     sorted_list = None
     sorted_list = ms.sort(sub_list,cmpartistsbymedium)
+
     lista_prueba = lt.newList('ARRAY_LIST')
+    lista_numeros = lt.newList('ARRAY_LIST')
     for j in lt.iterator(sorted_list):
+
         if (lt.isPresent (lista_prueba, j)) == 0:
             total_medios +=1
+            numero_medios = 1
             lt.addLast(lista_prueba,j)
+        else:
+            numero_medios +=1
+        mp.put(catalog['techniques'],numero_medios,j)
+        lt.addLast(lista_numeros,numero_medios)
 
-
-
-
+    mayor_numero = max(lista_numeros['elements'])
+    p = mp.get(catalog['techniques'],mayor_numero)
+    tecnica_mas_usada = me.getValue(p)
+    
+    listafinal = lt.newList('ARRAY_LIST')
+    for i in lt.iterator(v['Artworks']):
+        if i['Medium'] == tecnica_mas_usada:
+            dictfinal = {}
+            dictfinal['Título'] = i['Title']
+            dictfinal['Fecha'] = i['Date']
+            dictfinal['Medio'] = i['Medium']
+            dictfinal['Dimensiones'] = i['Dimensions']
+            lt.addLast(listafinal,dictfinal)
+    
+    return (listafinal,total_obras,total_medios,tecnica_mas_usada)
     
 def countArtworksByNationality(catalog):
 

@@ -162,7 +162,17 @@ while True:
     elif int(inputs[0]) == 4:
         name = input ('Indique el nombre del artista: ')
         r = controller.classifyArtists(catalog,name)
-        print (r)
+        print (str(name) + ' tiene ' + str(r[1]) + ' obras con su nombre en el museo.')
+        print ('Hay ' + str(r[2]) + ' técnicas diferentes usadas en sus obras.')
+        print ('Su técnica más utilizada fue ' + str(r[3][0]) + '.')
+        print ('Las tres primeras obras de ' + str(name) + 'usando ' + str(r[3][0]) + ' son:')
+        print(r[0]['elements'][0])
+        print(r[0]['elements'][1])
+        print(r[0]['elements'][2])
+        print('Las tres últimas obras de ' + str(name) + 'usando ' + str(r[3]) + ' son:')
+        print(r[0]['elements'][-1])
+        print(r[0]['elements'][-2])
+        print(r[0]['elements'][-3])
         
     elif int(inputs[0]) == 5:
 
