@@ -20,6 +20,7 @@
  * along withthis program.  If not, see <http://www.gnu.org/licenses/>.
  """
 
+#from DISClib.DataStructures.arraylist import size
 import config as cf
 import controller
 from DISClib.ADT import list as lt
@@ -42,11 +43,11 @@ def printSortedResults(result):
 
     print('En el rango dado hay: ' + str(result[1]))
     print('De esas obras se compraron: '+ str(result[2]))
-    print('Las primeras 3 obras del rango en base a su fecha de creacion son: ')
+    print('Las primeras 3 obras del rango en base a su fecha de adquisicion son: ')
     print(result[0]['elements'][0])
     print(result[0]['elements'][1])
     print(result[0]['elements'][2])
-    print('Las ultimas 3 obras del rango en base a su fecha de creacion son: ')
+    print('Las ultimas 3 obras del rango en base a su fecha de adquisicion son: ')
     print(result[0]['elements'][-1])
     print(result[0]['elements'][-2])
     print(result[0]['elements'][-3])

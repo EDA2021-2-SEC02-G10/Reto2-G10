@@ -289,7 +289,9 @@ def newArtwork(title):
 
 
 # Funciones de consulta
-def sortArtists (catalog, year1,year2):
+
+
+def sortArtists(catalog, year1, year2):
     yearkeys = mp.keySet(catalog['birthArtist'])
     yearlist = lt.newList('ARRAY_LIST')
 
@@ -300,16 +302,16 @@ def sortArtists (catalog, year1,year2):
 
     sub_list = yearlist.copy()
     sorted_list = None
-    sorted_list = ms.sort(sub_list,cmpArtistbyBirthDate)
+    sorted_list = ms.sort(sub_list, cmpArtistbyBirthDate)
     totalArtists = 0
-    listaFinal=lt.newList('ARRAY_LIST')
+    listaFinal = lt.newList('ARRAY_LIST')
     for x in lt.iterator(sorted_list):
         entryData = mp.get(catalog['birthArtist'],x)
         data = me.getValue(entryData)
         for y in lt.iterator(data):
             d = {}
             d['Nombre'] = y['name']
-            if y ['BeginDate'] == '0':
+            if y['BeginDate'] == '0':
                 d['año de nacimiento'] = 'no se sabe'
             else:
                 d['año de nacimiento'] = y['BeginDate']
@@ -320,9 +322,10 @@ def sortArtists (catalog, year1,year2):
 
             d['Nacionalidad'] = y['Nationality']
             d['Género'] = y['Gender']
-            lt.addLast(listaFinal,d)
+            lt.addLast(listaFinal, d)
             totalArtists += 1
     return (listaFinal, totalArtists)
+
 
 def sortArtworksByAdDate(catalog, d1, d2):
 
@@ -343,23 +346,21 @@ def sortArtworksByAdDate(catalog, d1, d2):
     for element in lt.iterator(sorted_list):
         entryData = mp.get(catalog['adDate'], element)
         data = me.getValue(entryData)
-        adDate = me.getKey(entryData)
-        dicT = {}
+        adDate = element
         for lstElement in lt.iterator(data):
-            dicT['Title'] = lstElement['Title']
-            dicT['DateAcquired'] = adDate
-            dicT['Date'] = lstElement['Date']
-            dicT['Artists'] = lstElement['Artists']
-            dicT['Medium'] = lstElement['Medium']
-            dicT['Dimensions'] = lstElement['Dimensions']
-            lt.addLast(lstFinal, dicT)
+            if adDate != '':
+                lstElement['DateAcquired'] = adDate
+            else:
+                lstElement['DateAcquired'] = '2021-12-12'
+            lt.addLast(lstFinal, lstElement)
             totalArtworks += 1
             if 'Purchase' in lstElement['CreditLine']:
                 totalPurchasedartworks += 1
 
     return lstFinal, totalArtworks, totalPurchasedartworks
 
-def classifyArtists (catalog, name):
+
+def classifyArtists(catalog, name):
     total_obras = 0
     total_medios = 0
     artists = mp.keySet(catalog['artists'])

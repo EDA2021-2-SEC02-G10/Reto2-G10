@@ -94,18 +94,21 @@ def loadArtists(catalog):
 
 
 # Funciones de consulta sobre el catálogo
-def sortArtists(catalog,year1,year2):
+def sortArtists(catalog, year1, year2):
 
-    return model.sortArtists(catalog,year1,year2)
+    return model.sortArtists(catalog, year1, year2)
+
 
 def sortArtworksByAdDate(catalog, d1, d2):
 
     return model.sortArtworksByAdDate(catalog, d1, d2)
 
-def classifyArtists(catalog,name):
 
-    return model.classifyArtists(catalog,name)
-    
+def classifyArtists(catalog, name):
+
+    return model.classifyArtists(catalog, name)
+
+
 def countArtworksNationality(catalog):
 
     return model.countArtworksByNationality(catalog)
