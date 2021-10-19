@@ -402,8 +402,8 @@ def classifyArtists (catalog, name):
             dictfinal['Fecha'] = i['Date']
             dictfinal['Medio'] = i['Medium']
             dictfinal['Dimensiones'] = i['Dimensions']
-            lt.addLast(listafinal,dictfinal)
-    
+            lt.addLast(listafinal,dictfinal)    
+            
     return (listafinal,total_obras,total_medios,tecnica_mas_usada)
     
 def countArtworksByNationality(catalog):
